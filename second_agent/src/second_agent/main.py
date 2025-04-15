@@ -1,22 +1,38 @@
-from agents import Agent,Runner,OpenAIChatCompletionsModel,
+from agents import Agent,Runner,OpenAIChatCompletionsModel,AsyncOpenAI,set_tracing_disabled
 from dotenv import load_dotenv
 import os
-load_dotenv
+import asyncio
+load_dotenv()
 
-model = OpenAIChatCompletionsModel(
-    
+set_tracing_disabled(True)
+
+provider =  AsyncOpenAI(
+         api_key = os.getenv("GEMINI_API_KEY"),
+         base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
+
+     )
+
+Model = OpenAIChatCompletionsModel(
+    model = "gemini-2.0-flash",
+     openai_client = provider,
 )
 
-
-
-My_agent = Agent(
+async def main():
+    My_agent = Agent(
     name="second_agent",
     instructions="You are a Asistance. You are a helpful assistant. You will answer the user query",
+    model= Model
 )
-
-response = Runner.run_sync(
+    response = await Runner.run(
     starting_agent =My_agent,
-    input ="What is the capital of France?",
+    input ="tell me about Islam?",
+    )
+    print(response.final_output)
+
+asyncio.run(main())
+
+
+
+
     
-)
-print(response)
+
